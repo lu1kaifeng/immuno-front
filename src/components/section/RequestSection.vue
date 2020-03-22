@@ -6,10 +6,10 @@
     >
         <v-list-item>
             <v-list-item-content>
-                <v-list-item-title class="overline mb-4">Gene Searcher</v-list-item-title>
+
                 <v-container fluid>
                     <v-row  no-gutters>
-                        <v-col cols="12"><v-text-field label="Search Gene Name" :rules="rules" hide-details="auto" :loading="loading" v-model="keyWord">
+                        <v-col cols="12"><v-text-field label="Gene Symbol" :rules="rules" hide-details="auto" :loading="loading" v-model="keyWord">
                             <v-btn icon @click="search" slot="append"><v-icon>mdi-magnify</v-icon></v-btn>
                         </v-text-field></v-col>
                     </v-row>
@@ -18,7 +18,7 @@
                             <v-select
                                     :items="geneNames"
                                     @change="geneSelectChange"
-                                    label="Gene Symbol"
+                                    label="idref"
                                     :disabled="!selectionEnable"
                                     v-model="geneNameSelected"
                             ></v-select>
@@ -47,7 +47,7 @@
                         <v-col cols="3">
                             <v-select
                                     :items="events"
-                                    label="Event"
+                                    label="Survival"
                                     :disabled="!selectionEnable"
                                     v-model="eventSelected"
                                     item-text="text"
@@ -100,7 +100,7 @@
         </v-list-item>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn @click="plot" text :disabled="!plotEnabled">Kaplan-Meier plot</v-btn>
+            <v-btn @click="plot" :disabled="!plotEnabled" class="text-transform-none">Kaplan-Meier plot</v-btn>
         </v-card-actions>
         <v-overlay :value="overlay">
             <v-progress-circular indeterminate size="64"></v-progress-circular>
@@ -193,7 +193,7 @@
                 let model = this;
                 let selectGene = model.chromosomeRangeSelected;
                 // eslint-disable-next-line no-unused-vars
-                Client.plot(this.eventSelected,selectGene).then(function (response) {
+                Client.plot(this.eventSelected,selectGene,model.tnmSelected,model.genderSelected,model.raceSelected).then(function (response) {
                     model.$emit("onResult",'data:image/png;base64,'+Buffer.from(response.data, 'binary').toString('base64'));
                     model.overlay  = false;
                     // eslint-disable-next-line no-unused-vars
@@ -224,5 +224,7 @@
 </script>
 
 <style scoped>
-
+    .v-btn {
+        text-transform:none !important;
+    }
 </style>
