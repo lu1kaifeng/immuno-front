@@ -18,16 +18,16 @@
                             <v-select
                                     :items="geneNames"
                                     @change="geneSelectChange"
-                                    label="Select Gene"
+                                    label="Gene Symbol"
                                     :disabled="!selectionEnable"
                                     v-model="geneNameSelected"
                             ></v-select>
                         </v-col>
-                        <v-col cols="2">
+                        <v-col cols="4">
                             <v-select
                                     :items="chromosomeNames"
                                     @change="chromosomeSelectChange"
-                                    label="Select Chromosome"
+                                    label="Chromosome"
                                     :disabled="!selectionEnable"
                                     v-model="chromosomeNameSelected"
                             ></v-select>
@@ -35,17 +35,63 @@
                         <v-col cols="4">
                             <v-select
                                     :items="chromosomeRanges"
-                                    label="Select Chromosome Range"
+                                    label="Chromosome Range"
                                     :disabled="!selectionEnable"
                                     v-model="chromosomeRangeSelected"
+                                    item-text="chromosomeRange"
+                                    item-value="id"
+                            ></v-select>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col cols="3">
+                            <v-select
+                                    :items="events"
+                                    label="Event"
+                                    :disabled="!selectionEnable"
+                                    v-model="eventSelected"
+                                    item-text="text"
+                                    item-value="value"
+                            ></v-select>
+                        </v-col>
+                        <v-col cols="3">
+                        <v-select
+                                :items="tnm"
+                                label="TNM"
+                                :disabled="!selectionEnable"
+                                v-model="tnmSelected"
+                                item-text="text"
+                                item-value="value"
+                        ></v-select>
+                        </v-col>
+                        <v-col cols="2">
+                            <v-select
+                                    :items="race"
+                                    label="Race"
+                                    :disabled="!selectionEnable"
+                                    v-model="raceSelected"
+                                    item-text="text"
+                                    item-value="value"
                             ></v-select>
                         </v-col>
                         <v-col cols="2">
                             <v-select
-                                    :items="events"
-                                    label="Select Event"
+                                    :items="gender"
+                                    label="Gender"
                                     :disabled="!selectionEnable"
-                                    v-model="eventSelected"
+                                    v-model="genderSelected"
+                                    item-text="text"
+                                    item-value="value"
+                            ></v-select>
+                        </v-col>
+                        <v-col cols="2">
+                            <v-select
+                                    :items="split"
+                                    label="Split"
+                                    :disabled="!selectionEnable"
+                                    v-model="splitSelected"
+                                    item-text="text"
+                                    item-value="value"
                             ></v-select>
                         </v-col>
                     </v-row>
@@ -54,7 +100,7 @@
         </v-list-item>
         <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn @click="plot" text :disabled="this.geneSelected === null || this.eventSelected === null">Plot</v-btn>
+            <v-btn @click="plot" text :disabled="!plotEnabled">Kaplan-Meier plot</v-btn>
         </v-card-actions>
         <v-overlay :value="overlay">
             <v-progress-circular indeterminate size="64"></v-progress-circular>
@@ -66,14 +112,23 @@
 
     import Client from "../../client/Client";
     import JSONBigInt from "json-bigint"
+    import Constant from "../../client/Constant";
 
     export default {
         name: "RequestSection",
         data:()=>({
+            split:Constant.Split,
+            splitSelected:null,
+            gender:Constant.Gender,
+            genderSelected:null,
+            tnm:Constant.TNM,
+            tnmSelected:null,
+            race:Constant.Race,
+            raceSelected:null,
             keyWord:"",
             overlay:false,
             loading:false,
-            events: ['OS'],
+            events: Constant.Survival,
             geneLists: [
             ],
             geneNames:[],
@@ -85,13 +140,18 @@
             chromosomeRangeSelected:null,
             chromosomeNameSelected:null,
             geneNameSelected:null,
-            eventSelected:null,
+            eventSelected:'OS',
             selectionEnable:false
         }),
         watch:{
             keyWord:function () {
                 this.reset()
             }
+        },
+        computed:{
+          plotEnabled:function () {
+              return this.chromosomeRangeSelected !== null && this.chromosomeNameSelected !== null && this.geneNameSelected !== null
+          }
         },
         methods:{
             reset:function(){
@@ -103,7 +163,11 @@
                 model.chromosomeRangeSelected = null;
                 model.chromosomeNameSelected = null;
                 model.geneNameSelected = null;
-                model.eventSelected = null;
+                model.eventSelected = 'OS';
+                model.splitSelected=null;
+                model.genderSelected=null;
+                model.tnmSelected=null;
+                model.raceSelected=null;
                 model.selectionEnable = false;
             },
             search:function () {
@@ -127,18 +191,13 @@
             plot:function(){
                 this.overlay  = true;
                 let model = this;
-                let selectGene;
-                for(let g of this.geneLists){
-                    if((this.geneNameSelected === g.gene +"-"+g.sample) && this.chromosomeNameSelected === g.chromosome && this.chromosomeRangeSelected === g.chromosomeStart + "-" + g.chromosomeEnd){
-                        selectGene = g;
-                    }
-                }
+                let selectGene = model.chromosomeRangeSelected;
                 // eslint-disable-next-line no-unused-vars
-                Client.plot(this.eventSelected,selectGene.id).then(function (response) {
+                Client.plot(this.eventSelected,selectGene).then(function (response) {
                     model.$emit("onResult",'data:image/png;base64,'+Buffer.from(response.data, 'binary').toString('base64'));
                     model.overlay  = false;
                     // eslint-disable-next-line no-unused-vars
-                }).then(function (error) {
+                }).catch(function (error) {
                     alert(error);
                     model.overlay  = false;
                 })
@@ -155,7 +214,8 @@
                 let model = this;
                 for(let g of model.geneLists){
                     if(model.chromosomeNames.includes(g.chromosome)){
-                        model.chromosomeRanges.push(g.chromosomeStart + "-" + g.chromosomeEnd)
+                        g.chromosomeRange = g.chromosomeStart +"-"+ g.chromosomeEnd;
+                        model.chromosomeRanges.push(g)
                     }
                 }
             }
