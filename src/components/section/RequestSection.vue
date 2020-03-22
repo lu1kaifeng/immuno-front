@@ -1,37 +1,43 @@
 <template>
     <v-card
             class="mx-auto"
-            max-width="500"
+            max-width="700"
             outlined
     >
         <v-list-item>
             <v-list-item-content>
-                <v-list-item-title class="overline mb-4">Align</v-list-item-title>
+                <v-list-item-title class="overline mb-4">Gene Searcher</v-list-item-title>
                 <v-container fluid>
-                    <v-row dense>
-                        <v-col cols="12">
-                            <v-text-field label="Sequence" hide-details="auto" v-model="request.sequence"></v-text-field>
-                        </v-col>
+                    <v-row  no-gutters>
+                        <v-col cols="12"><v-text-field label="Search Gene Name" :rules="rules" hide-details="auto" v-model="request.keyWord">
+                            <v-btn icon @click="search" slot="append"><v-icon>mdi-magnify</v-icon></v-btn>
+                        </v-text-field></v-col>
                     </v-row>
-                    <v-row dense>
-                        <v-col cols="3">
-                            <v-text-field type="number" label="Open Penalty" v-model="request.openPenalty"></v-text-field>
-                        </v-col>
-                        <v-col cols="3">
-                            <v-text-field type="number" label="Extension Penalty" v-model="request.extensionPenalty"></v-text-field>
-                        </v-col>
-                        <v-col cols="6">
-                            <v-text-field type="number" label="Display Entries with Similarity Above" v-bind:value="request.lowestPercent * 100" @change="percentageChange" suffix="%"></v-text-field>
+                    <v-row no-gutters>
+                        <v-col cols="12">
+                            <v-data-table
+                                    :headers="headers"
+                                    :items="genes"
+                                    show-select
+                                    :loading="loading"
+                                    loading-text="Searching... Please wait"
+                                    :single-select="true"
+                                    v-model="selected"
+                            ></v-data-table>
                         </v-col>
                     </v-row>
                 </v-container>
-
             </v-list-item-content>
         </v-list-item>
 
         <v-card-actions>
+            <v-select
+                    :items="items"
+                    label="Select Event"
+                    v-model="eventSelected"
+            ></v-select>
             <v-spacer></v-spacer>
-            <v-btn @click="align" text :disabled="this.request.sequence === ''">Align</v-btn>
+            <v-btn @click="plot" text :disabled="this.selected.length === 0 || this.eventSelected.length === 0">Plot</v-btn>
         </v-card-actions>
         <v-overlay :value="overlay">
             <v-progress-circular indeterminate size="64"></v-progress-circular>
@@ -41,36 +47,63 @@
 
 <script>
     import AlignmentRequest from "@/model/AlignmentRequest";
-    import AlignClient from "@/client/AlignClient";
-    import AlignmentEntry from "@/model/AlignmentEntry";
+    import Client from "../../client/Client";
+    import JSONBigInt from "json-bigint"
 
     export default {
         name: "RequestSection",
         data:()=>({
             request:new AlignmentRequest(),
             overlay:false,
+            loading:false,
+            headers: [
+                {
+                    text: 'Sample',
+                    align: 'start',
+                    sortable: false,
+                    value: 'sample',
+                },
+                { text: 'Gene', value: 'gene' },
+                { text: 'Chromosome', value: 'chromosome' },
+                { text: 'Start', value: 'chromosomeStart' },
+                { text: 'End', value: 'chromosomeEnd' },
+            ],
+            items: ['OS'],
+            genes: [
+            ],
+            rules: [
+                value => !!value || 'Required.',
+            ],
+            selected:[],
+            eventSelected:[]
         }),
         methods:{
-            percentageChange:function (percent) {
-                this.request.lowestPercent = percent / 100;
-            },
-            align:function () {
+            search:function () {
+                this.loading = true;
                 let model = this;
-                this.overlay = true;
-                this.entries = [];
-                // eslint-disable-next-line no-unused-vars
-                AlignClient.align(this.request).then(function (response) {
-                    let entries = [];
-                    for(let entry of response.data){
-                        entry.percentageOfIdentity = entry.percentageOfIdentity * 100 + '%';
-                        entries.push(new AlignmentEntry(entry));
+                Client.search(this.request.keyWord).then(function(response){
+                    model.selected.length = 0;
+                    model.genes.length=0;
+
+                    for(let i of JSONBigInt({"storeAsString": true}).parse(response.data)){
+                        model.genes.push(i)
                     }
-                    model.overlay = false;
-                    model.$emit("onResult",entries)
+                    model.loading = false
                     // eslint-disable-next-line no-unused-vars
                 }).catch(function (error) {
-                    alert(error);
-                    model.overlay = false;
+                    model.loading = false
+                })
+            },
+            plot:function(){
+                this.overlay  = true;
+                let model = this;
+                // eslint-disable-next-line no-unused-vars
+                Client.plot(this.eventSelected,this.selected[0].id).then(function (response) {
+                    model.$emit("onResult",'data:image/png;base64,'+Buffer.from(response.data, 'binary').toString('base64'));
+                    model.overlay  = false;
+                    // eslint-disable-next-line no-unused-vars
+                }).then(function (error) {
+                    model.overlay  = false;
                 })
             }
         }

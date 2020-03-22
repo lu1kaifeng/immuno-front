@@ -10,7 +10,7 @@
         <v-row>
             <v-col cols="2"><v-spacer/></v-col>
             <v-col cols="8" class="mt-xl-12 mt-lg-10 mt-md-8 mt-sm-8">
-                <TableSection v-if="entries.length !== 0" v-bind:entries="entries"/>
+                <img v-if="plot !== null" :src="plot" alt="plot"/>
             </v-col>
             <v-col cols="2"><v-spacer/></v-col>
         </v-row>
@@ -19,22 +19,18 @@
 
 <script>
     import RequestSection from "@/components/section/RequestSection";
-    import TableSection from "@/components/section/TableSection";
     export default {
         name: "Alignment",
         components:{
-            TableSection,
             RequestSection
         },
         data:()=>({
-            entries:[]
+            entries:[],
+            plot:null
         }),
         methods:{
-            onResult:function (entries) {
-                this.entries.length = 0;
-                for(let entry of entries){
-                    this.entries.push(entry)
-                }
+            onResult:function (plot) {
+                this.plot =plot;
             }
         }
     }
