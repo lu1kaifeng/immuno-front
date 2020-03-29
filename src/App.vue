@@ -13,7 +13,7 @@
       </v-row>
       <v-row>
         <v-col cols="12">
-          <Alignment/>
+          <Plot/>
         </v-col>
       </v-row>
     </v-container>
@@ -21,12 +21,12 @@
 </template>
 
 <script>
-import Alignment from "@/components/Alignment";
+import Plot from "@/components/Plot";
 export default {
   name: 'App',
 
   components: {
-    Alignment
+    Plot
   },
 
   data: () => ({

@@ -3,7 +3,8 @@
         <v-row>
             <v-col cols="2"><v-spacer/></v-col>
             <v-col cols="8" class="mt-xl-12 mt-lg-10 mt-md-8 mt-sm-8">
-                <RequestSection @onResult="onResult"/>
+                <SearchSection @onResult="onResult"/>
+                <ProbeSelectionDialog/>
             </v-col>
             <v-col cols="2"><v-spacer/></v-col>
         </v-row>
@@ -18,11 +19,13 @@
 </template>
 
 <script>
-    import RequestSection from "@/components/section/RequestSection";
+    import SearchSection from "@/components/section/SearchSection";
+    import ProbeSelectionDialog from "./dialog/ProbeSelectionDialog";
     export default {
         name: "Alignment",
         components:{
-            RequestSection
+            ProbeSelectionDialog,
+            SearchSection
         },
         data:()=>({
             entries:[],
