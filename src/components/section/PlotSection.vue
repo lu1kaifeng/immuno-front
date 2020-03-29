@@ -56,6 +56,7 @@
                     // eslint-disable-next-line no-unused-vars
                 }).then(function (error) {
                     model.$emit("loaded")
+
                 })
             },
             forceRerender() {
