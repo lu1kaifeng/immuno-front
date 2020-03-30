@@ -7,7 +7,7 @@
                 <v-card-title class="headline"></v-card-title>
 
                 <v-card-text >
-                    <PlotSection v-bind:id="entry.id" v-bind:survival="survival" @loaded="load = false"/>
+                    <PlotSection v-bind:id="entry.id" v-bind:entry="entry" @loaded="load = false"/>
                     <v-skeleton-loader
                             v-if="load"
                             class="mx-lg-5"
@@ -36,7 +36,6 @@
         components: {PlotSection},
         props:{
             entry : Object,
-            survival:String,
             display:Boolean
         },
         data:()=>({
@@ -44,9 +43,6 @@
         }),
         watch:{
             "entry.id":function () {
-                this.load = false
-            },
-            survival:function () {
                 this.load = false
             },
             display:function(){

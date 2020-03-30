@@ -32,7 +32,7 @@
         }),
         props:{
             id:String,
-            survival:String
+            entry:Object
         },
         watch:{
           id:function () {
@@ -50,7 +50,8 @@
             plotFunc:function(){
                 let model = this;
                 // eslint-disable-next-line no-unused-vars
-                Client.plot(this.survival,this.id).then(function (response) {
+
+                Client.plot(this.entry.survival,this.id,this.entry.tnm,this.entry.gender,this.entry.race).then(function (response) {
                     model.plot = 'data:image/png;base64,'+Buffer.from(response.data, 'binary').toString('base64');
                     model.$emit("loaded")
                     // eslint-disable-next-line no-unused-vars

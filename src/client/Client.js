@@ -11,13 +11,13 @@ export default class Client {
     }
     static plotHeader(tnm,race,gender){
         let header = {};
-        if(tnm !== undefined){
+        if(tnm !== undefined && tnm !== null){
             header['x-sample-tnm'] = tnm
         }
-        if(race !==undefined){
+        if(race !== undefined && race !== null){
             header['x-sample-race'] = race
         }
-        if(gender !== undefined){
+        if(gender !== undefined && gender !== null){
             header['x-sample-gender'] = gender
         }
         return header;
