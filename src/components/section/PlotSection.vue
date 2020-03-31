@@ -2,11 +2,10 @@
     <!--<v-img v-if="plot !== null" :src="plot" alt="plot" width="320" height="320"/>-->
     <v-img
             :src="plot"
-            lazy-src="https://picsum.photos/id/11/100/60"
             aspect-ratio="1"
             class="grey lighten-2"
             max-width="500"
-            max-height="300"
+            max-height="500"
             :key="rerenderKey"
     >
         <template v-slot:placeholder>
@@ -32,21 +31,22 @@
         }),
         props:{
             id:String,
-            entry:Object
+            entry:Object,
+            reRender:Number
+        },
+        mounted() {
+            this.reload()
         },
         watch:{
-          id:function () {
-              this.plot = undefined;
-              this.forceRerender();
-              this.plotFunc();
-          },
-            survival:function () {
-                this.plot =  undefined;
-                this.forceRerender();
-                this.plotFunc()
+          reRender:function () {
+                this.reload();
           }
         },
         methods:{
+            reload:function(){
+                this.plotFunc();
+                this.forceRerender();
+            },
             plotFunc:function(){
                 let model = this;
                 // eslint-disable-next-line no-unused-vars

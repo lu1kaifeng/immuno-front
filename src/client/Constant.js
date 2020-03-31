@@ -56,10 +56,6 @@ export default class {
     ];
     static Split=[
         {
-            text:"All",
-            value:null
-        },
-        {
             text:"Upper 25%",
             value:"U25"
         },

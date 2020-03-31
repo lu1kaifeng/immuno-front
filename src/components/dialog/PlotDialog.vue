@@ -7,12 +7,7 @@
                 <v-card-title class="headline"></v-card-title>
 
                 <v-card-text >
-                    <PlotSection v-bind:id="entry.id" v-bind:entry="entry" @loaded="load = false"/>
-                    <v-skeleton-loader
-                            v-if="load"
-                            class="mx-lg-5"
-                            type="card"
-                    ></v-skeleton-loader>
+                    <PlotSection v-bind:id="entry.id" v-bind:entry="entry" v-bind:re-render="reRender"/>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
@@ -33,19 +28,20 @@
     import PlotSection from "../section/PlotSection";
     export default {
         name: "PlotDialog",
+        // eslint-disable-next-line vue/no-unused-components
         components: {PlotSection},
         props:{
             entry : Object,
             display:Boolean
         },
         data:()=>({
-            load:false
+            reRender:0
         }),
         watch:{
-            "entry.id":function () {
-                this.load = false
-            },
             display:function(){
+                if(this.display === true){
+                    this.reRender++;
+                }
                 if(this.display === false) this.$emit('close')
             }
         }
