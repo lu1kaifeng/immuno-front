@@ -22,4 +22,9 @@ export default class Client {
         }
         return header;
     }
+    static linearPlot(gene,sample){
+        return Axios.get('/linear/'+gene+'/'+sample,{
+            responseType: 'arraybuffer'
+        })
+    }
 }

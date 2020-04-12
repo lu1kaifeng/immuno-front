@@ -38,6 +38,7 @@
                     </v-simple-table>
                 <v-card-text >
                     <PlotSection v-bind:id="entry.id" v-bind:entry="entry" v-bind:re-render="reRender"/>
+                    <LinearPlotSection v-bind:id="entry.id" v-bind:entry="entry" v-bind:re-render="reRender"/>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
@@ -56,10 +57,11 @@
 
 <script>
     import PlotSection from "../section/PlotSection";
+    import LinearPlotSection from "../section/LinearPlotSection";
     export default {
         name: "PlotDialog",
         // eslint-disable-next-line vue/no-unused-components
-        components: {PlotSection},
+        components: {PlotSection,LinearPlotSection},
         props:{
             entry : Object,
             display:Boolean
